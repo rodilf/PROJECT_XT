@@ -16,7 +16,7 @@ public class Tre {
 		x = (int)(Math.random()*129);
 		y = (int)(Math.random()*129);
 		try {
-			tre = ImageIO.read(new File("tree.png"));
+			tre = ImageIO.read(new File("images/tree.png"));
 		}
 		catch (Exception e) {
 			e.printStackTrace();

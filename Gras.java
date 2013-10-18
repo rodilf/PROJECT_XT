@@ -13,7 +13,7 @@ public class Gras {
 
 	public Gras() {
 		try {
-			gras = ImageIO.read(new File("grass.png"));
+			gras = ImageIO.read(new File("images/grass.png"));
 		}
 		catch (Exception e) {
 			e.printStackTrace();

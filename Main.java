@@ -3,6 +3,8 @@ import java.util.Vector;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 import javax.swing.JScrollPane;
+import javax.swing.JLayeredPane;
+import javax.swing.SwingUtilities;
 
 import java.awt.Graphics;
 import java.awt.Color;
@@ -22,28 +24,35 @@ public class Main {
 	static JFrame frame = new JFrame();
 
 	public static void main(String[] args) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				final Core core = new Core();
+				final Background bg = new Background();
+				final JLayeredPane layeredPane = new JLayeredPane();
 
-	 //   final JFrame frame = new JFrame();
-		final Core core = new Core();
-		final Background bg = new Background();
-
-		frame.setSize(MAIN_FRAME_X,MAIN_FRAME_Y);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setContentPane(bg);
-		frame.setGlassPane(core);
-		bg.setVisible(true);
-		core.setVisible(true);
-		frame.setVisible(true);
-		core.setOpaque(false);
-
-		int delay = 1000/60; //milliseconds
-		ActionListener taskPerformer = new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				core.update();
-				frame.repaint();
+				frame.setSize(MAIN_FRAME_X,MAIN_FRAME_Y);
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				frame.setContentPane(layeredPane);
+				layeredPane.add(bg);
+				layeredPane.add(core, new Integer(1));
+				bg.setSize(frame.getSize());
+				core.setSize(frame.getSize());
+				bg.setVisible(true);
+				core.setVisible(true);
+				frame.setVisible(true);
+				core.setOpaque(false);
+				int delay = 1000/60; //milliseconds
+				ActionListener taskPerformer = new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent evt) {
+						core.update();
+						layeredPane.repaint();
+					}
+		 		};
+		 		new Timer(delay, taskPerformer).start();
 			}
-		 };
-		new Timer(delay, taskPerformer).start();
+		});//.start();
 
 		/*frame.addKeyListener(new KeyListener() {
 			public void keyPressed(KeyEvent e) {

@@ -77,12 +77,11 @@ public class Core extends JPanel {
 		}
 		g.drawString("(" + Double.toString(currentPoint.getX()) + " ; " + Double.toString(currentPoint.getY()) + ")",10,10);
 
-		//villager.get(0).draw(g);
+
 	}
 
 	public void update() {
 		if(!(lastPoint.equals(currentPoint))) {
-			System.out.println("nigger");
 			x = currentPoint.getX()/128;
 			if(x < 0)
 				Math.floor(x);
@@ -99,11 +98,8 @@ public class Core extends JPanel {
 						point.add(new Point(i,c));
 						chunk.add(new Chunk(point.get(point.size()-1)));
 					}
-					else
-						System.out.println("shurhuepaore");
 				}
 			}
-			System.out.println(Integer.toString(point.size()));
 			lastPoint.y = (int)currentPoint.getY();
 			lastPoint.x = (int)currentPoint.getX();
 		}

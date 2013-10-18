@@ -11,7 +11,7 @@ public class Vilager {
 
 	public Vilager() {
 		try {
-			vilager = ImageIO.read(new File("villager.png"));
+			vilager = ImageIO.read(new File("images/villager.png"));
 		}
 		catch (Exception e) {
 			e.printStackTrace();
