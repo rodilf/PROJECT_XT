@@ -1,6 +1,8 @@
 import javax.imageio.ImageIO;
+
 import java.io.File;
 import java.lang.Exception;
+
 import java.awt.image.BufferedImage;
 import java.awt.Graphics;
 import java.awt.Point;

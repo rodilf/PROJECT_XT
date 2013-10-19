@@ -1,16 +1,8 @@
-import java.util.Vector;
-
 import javax.swing.JFrame;
 import javax.swing.Timer;
-import javax.swing.JScrollPane;
 import javax.swing.JLayeredPane;
 import javax.swing.SwingUtilities;
 
-import java.awt.Graphics;
-import java.awt.Color;
-
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
@@ -42,7 +34,7 @@ public class Main {
 				core.setVisible(true);
 				frame.setVisible(true);
 				core.setOpaque(false);
-				int delay = 1000/60; //milliseconds
+				int delay = 1000/60;        //milliseconds
 				ActionListener taskPerformer = new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent evt) {
@@ -52,20 +44,6 @@ public class Main {
 		 		};
 		 		new Timer(delay, taskPerformer).start();
 			}
-		});//.start();
-
-		/*frame.addKeyListener(new KeyListener() {
-			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-					System.out.println("update");
-				}
-			}
-			public void keyReleased(KeyEvent e) {
-			}
-			public void keyTyped(KeyEvent e) {
-			}
-		});*/
+		});
 	}
 }
-//http://www.youtube.com/watch?v=sUjSluboyY4
-//http://www.macs.hw.ac.uk/guidebook/?name=JButton&page=2

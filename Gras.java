@@ -1,7 +1,7 @@
 import javax.imageio.ImageIO;
+
 import java.io.File;
 import java.lang.Exception;
-import java.util.Vector;
 
 import java.awt.image.BufferedImage;
 import java.awt.Graphics;

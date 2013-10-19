@@ -1,14 +1,11 @@
 import javax.swing.JPanel;
-import java.awt.Graphics;
-import java.util.Vector;
+
 import java.util.ArrayList;
-import java.math.BigDecimal;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import java.awt.Point;
+import java.awt.Graphics;
 
 public class Core extends JPanel {
 
