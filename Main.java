@@ -5,6 +5,8 @@ import javax.swing.SwingUtilities;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 public class Main {
 
@@ -14,13 +16,18 @@ public class Main {
 		int MAIN_WORLD_X = 0;
 		int MAIN_WORLD_Y = 0;
 	static JFrame frame = new JFrame();
-
+    static Core core = new Core();
+    static Background bg = new Background();
 	public static void main(String[] args) {
+	    frame.addComponentListener(new ComponentAdapter() {
+	        public void componentResized(ComponentEvent e) {
+	            bg.setSize(frame.getSize());
+	            core.setSize(frame.getSize());
+	        }
+	    });
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				final Core core = new Core();
-				final Background bg = new Background();
 				final JLayeredPane layeredPane = new JLayeredPane();
 
 				frame.setSize(MAIN_FRAME_X,MAIN_FRAME_Y);
