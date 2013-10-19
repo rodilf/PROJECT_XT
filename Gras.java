@@ -12,6 +12,7 @@ public class Gras {
 	private int x = 0, y = 0;
 
 	public Gras() {
+	    
 		try {
 			gras = ImageIO.read(new File("images/grass.png"));
 		}
@@ -21,13 +22,15 @@ public class Gras {
 		System.out.println("gras");
 	}
 
-	public void draw(Graphics g,int a,int b) {
+	public void draw(Graphics g, int a, int b) {
+	    
 		x = a;
 		y = b;
-		g.drawImage(gras,x,y,null);
+		g.drawImage(gras, x, y, null);
 	}
 
 	public void update() {
+	    
 		System.out.println("update");
 	}
 }

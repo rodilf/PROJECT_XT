@@ -12,6 +12,7 @@ public class Vilager {
 	BufferedImage vilager;
 
 	public Vilager() {
+	    
 		try {
 			vilager = ImageIO.read(new File("images/villager.png"));
 		}
@@ -20,7 +21,8 @@ public class Vilager {
 		}
 	}
 
-	public void draw(Graphics g, Point p,Point q) {
-		g.drawImage(vilager,(int)(3*128-q.getX()),(int)(3*128-q.getY()),null);
+	public void draw(Graphics g, Point p, Point q) {
+	    
+		g.drawImage(vilager, (int)(3*128-q.getX()), (int)(3*128-q.getY()), null);
 	}
 }

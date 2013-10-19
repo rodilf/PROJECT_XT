@@ -25,7 +25,7 @@ public class Tre {
 	}
 
 	public void draw(Graphics g, Point p, Point q) {
-		g.drawImage(tre,(int)(x+p.getX()*128-q.getX()), (int)(y+p.getY()*128-q.getY()), null);
+		g.drawImage(tre, (int) (x+p.getX()*128-q.getX()), (int) (y+p.getY()*128-q.getY()), null);
 	}
 
 	public void update() {
