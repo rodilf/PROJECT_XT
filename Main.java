@@ -25,6 +25,7 @@ public class Main {
 	        public void componentResized(ComponentEvent e) {
 	            bg.setSize(frame.getSize());
 	            core.setSize(frame.getSize());
+	            core.update();
 	        }
 	    });
 	    
