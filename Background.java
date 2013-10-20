@@ -7,7 +7,6 @@ public class Background extends JPanel {
 	Gras gras = new Gras();
 
 	public Background() {
-		//24 16
 	}
 
 	public void paintComponent(Graphics g) {

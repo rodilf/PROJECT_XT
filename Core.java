@@ -27,27 +27,27 @@ public class Core extends JPanel {
 		}
 
 		Main.frame.addKeyListener(new KeyListener() {
-					public void keyPressed(KeyEvent e) {
-						if (e.getKeyCode() == KeyEvent.VK_UP) {
-							currentPoint.y -= 8;
-						}
-						if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-							currentPoint.y += 8;
-						}
-						if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-							currentPoint.x -= 8;
-						}
-						if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-							currentPoint.x += 8;
-						}
-						if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-							System.out.println(chunk.size());
-						}
-					}
-					public void keyReleased(KeyEvent e) {
-					}
-					public void keyTyped(KeyEvent e) {
-					}
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_UP) {
+					currentPoint.y -= 8;
+				}
+				if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+					currentPoint.y += 8;
+				}
+				if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+					currentPoint.x -= 8;
+				}
+				if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+					currentPoint.x += 8;
+				}
+				if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+					System.out.println(chunk.size());
+				}
+			}
+			public void keyReleased(KeyEvent e) {
+			}
+			public void keyTyped(KeyEvent e) {
+			}
 		});
 	}
 
