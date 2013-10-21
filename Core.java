@@ -1,13 +1,15 @@
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
+import javax.swing.event.MouseInputAdapter;
 
 import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.lang.ThreadGroup;
-
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.Point;
 import java.awt.Graphics;
 import java.awt.Color;
@@ -24,9 +26,12 @@ public class Core extends JPanel {
 	Point currentPoint = new Point(0,0);
 	Point lastPoint = new Point(0,0);
 	double x, y = 0;
-	private final Lock lock = new ReentrantLock();
+	
 	public static Images images = new Images();
+	
 	SwingWorker peon;
+	
+	static boolean mousePressed = false;
 
 
 	public static ThreadGroup loadGroup = new ThreadGroup("loadGroup");
@@ -62,13 +67,38 @@ public class Core extends JPanel {
 
 					}
 		});
+		MotionListener motionListener = new MotionListener();
+		Main.frame.addMouseListener(motionListener);
+		Main.frame.addMouseMotionListener(motionListener);
 	}
 
+	private class MotionListener extends MouseInputAdapter {
+	    int x, y, x2, y2;
+	    public void mousePressed(MouseEvent e) {
+	        if(e.getButton() == MouseEvent.BUTTON1) {
+	            x = e.getX();
+	            y = e.getY();
+	        }	        
+	    }
+	    public void mouseDragged(MouseEvent e) {
+	        x2 = e.getX();
+	        y2 = e.getY();
+	        currentPoint.x += x2-x;
+	        currentPoint.y += y2-y;
+	        x = x2;
+	        y = y2;
+	    }
+	}
 	public void paintComponent(Graphics g) {
 		g.setColor(Color.RED);
 		super.paintComponent(g);
 		for(int i = 0; i < drawIndex.size(); i++)
-		    chunk.get(drawIndex.get(i)).draw(g, currentPoint);
+		    try {
+		        chunk.get(drawIndex.get(i)).draw(g, currentPoint);
+		    } catch(Exception ignore) {
+		        
+		    }
+		    
 		g.drawString("("+currentPoint.getX()+";"+currentPoint.getY()+")", 10, 10);
 		g.drawString("cd: " + drawIndex.size(), 10, 20);
 		g.drawString("cl: " + chunk.size(), 10, 30);
