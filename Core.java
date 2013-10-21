@@ -1,13 +1,16 @@
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 
 import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.lang.ThreadGroup;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.Point;
 import java.awt.Graphics;
+import java.awt.Color;
 
 public class Core extends JPanel {
 
@@ -17,20 +20,21 @@ public class Core extends JPanel {
 	ArrayList<Chunk> chunkBuffer = new ArrayList<Chunk>();
 	ArrayList<Integer> drawIndex = new ArrayList<Integer>();
 	ArrayList<Integer> indexBuffer = new ArrayList<Integer>();
-	
+
 	Point currentPoint = new Point(0,0);
 	Point lastPoint = new Point(0,0);
 	double x, y = 0;
 	private final Lock lock = new ReentrantLock();
-	
-	public static ThreadGroup loadGroup = new ThreadGroup("loadGroup");
-	
-	public Core() {
+	public static Images images = new Images();
+	SwingWorker peon;
 
+
+	public static ThreadGroup loadGroup = new ThreadGroup("loadGroup");
+
+	public Core() {
 		villager.add(new Vilager());
-		if(loadGroup.activeCount() == 0)
-		    (new Thread(loadGroup, new loadChunks())).start();
-		Main.frame.addKeyListener(new KeyListener() {		    
+		(peon = new loadChunks()).execute();
+		Main.frame.addKeyListener(new KeyListener() {
 					public void keyPressed(KeyEvent e) {
 						if(e.getKeyCode() == KeyEvent.VK_UP) {
 							currentPoint.y -= 8;
@@ -52,22 +56,37 @@ public class Core extends JPanel {
 						}
 					}
 					public void keyReleased(KeyEvent e) {
-					    
+
 					}
 					public void keyTyped(KeyEvent e) {
-					    
+
 					}
 		});
 	}
-	
+
 	public void paintComponent(Graphics g) {
+		g.setColor(Color.RED);
 		super.paintComponent(g);
-		for(int i = 0; i < drawIndex.size(); i++) 
-		    chunk.get(drawIndex.get(i)).draw(g, currentPoint);		    
+		for(int i = 0; i < drawIndex.size(); i++)
+		    chunk.get(drawIndex.get(i)).draw(g, currentPoint);
+		g.drawString("("+currentPoint.getX()+";"+currentPoint.getY()+")", 10, 10);
+		g.drawString("cd: " + drawIndex.size(), 10, 20);
+		g.drawString("cl: " + chunk.size(), 10, 30);
 	}
-	public class loadChunks implements Runnable {
-    	public void run() {
-    	    
+
+	public class Pair<U, V> {
+		private U first;
+		private V second;
+
+		public Pair(U first, V second) {
+			this.first = first;
+			this.second = second;
+		}
+	}
+
+	public class loadChunks extends SwingWorker<Pair<ArrayList<Integer>, ArrayList<Chunk>>, Void> {
+		@Override
+    	public Pair<ArrayList<Integer>, ArrayList<Chunk>> doInBackground() {
             x = currentPoint.getX()/128;
             if(x < 0)
                 Math.floor(x);
@@ -78,7 +97,7 @@ public class Core extends JPanel {
                     Math.floor(y);
             else
                 Math.ceil(y);
-            
+
             for(int i = (int)x-2; i < (int)x+2 + Math.ceil(Main.frame.getWidth()/128); ++i) {
                 for(int c = (int)y-2; c < (int)y+2+Math.ceil(Main.frame.getHeight()/128); ++c) {
                     if(point.indexOf(new Point(i, c)) == -1) {
@@ -86,35 +105,39 @@ public class Core extends JPanel {
                         chunkBuffer.add(new Chunk(point.get(point.size()- 1)));
                     }
                     indexBuffer.add(point.indexOf(new Point(i, c)));
-                    
+
                 }
             }
+            return new Pair<ArrayList<Integer>, ArrayList<Chunk>>(indexBuffer, chunkBuffer);
+		}
+		@Override
+		public void done() {
             if(chunkBuffer.size() != 0) {
-                lock.lock();
-                System.out.println("loadChunks locked");
-                chunk.addAll(chunkBuffer);
                 drawIndex.clear();
-                drawIndex.addAll(indexBuffer);
+                try {
+                	drawIndex.addAll(get().first);
+				} catch (Exception ignore) {
+				}
+				try {
+					chunk.addAll(get().second);
+				} catch (Exception ignore) {
+				}
                 System.out.println(chunk.size() + " and " + chunkBuffer.size());
-                lock.unlock();
-                System.out.println("loadChunks unlocked");              
-            }else if(currentPoint.x%128 == 0 || currentPoint.y%128 == 0) {
-                lock.lock();
+            }else if((currentPoint.x%128 == 0 || currentPoint.y%128 == 0) && !lastPoint.equals(currentPoint)) {
                 drawIndex.clear();
-                drawIndex.addAll(indexBuffer);
-                lock.unlock();                
+				try {
+					drawIndex.addAll(get().first);
+				} catch (Exception ignore) {
+				}
             }
+            lastPoint.x = (int)currentPoint.getX();
+            lastPoint.y = (int)currentPoint.getY();
             chunkBuffer.clear();
             indexBuffer.clear();
     	}
 	}
 	public void update() {
-	    
-		if(/*!(lastPoint.equals(currentPoint)) && */loadGroup.activeCount() == 0) {
-		    (new Thread(loadGroup, new loadChunks())).start();
-		    
-			lastPoint.y = (int)currentPoint.getY();
-			lastPoint.x = (int)currentPoint.getX();
-		}
+		if(peon.getState() == SwingWorker.StateValue.valueOf("DONE"))
+		    (new loadChunks()).execute();
 	}
 }

@@ -12,15 +12,13 @@ public class Main {
 
 	public static int MAIN_FRAME_X = 512;
 	public static int MAIN_FRAME_Y = 512;
-	int MAIN_WORLD_X = 0;
-	int MAIN_WORLD_Y = 0;
-	
+
 	static JFrame frame = new JFrame();
     static Core core = new Core();
     static Background bg = new Background();
-    
+
 	public static void main(String[] args) {
-	    
+
 	    frame.addComponentListener(new ComponentAdapter() {
 	        public void componentResized(ComponentEvent e) {
 	            bg.setSize(frame.getSize());
@@ -28,7 +26,7 @@ public class Main {
 	            core.update();
 	        }
 	    });
-	    
+
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -37,19 +35,19 @@ public class Main {
 				frame.setSize(MAIN_FRAME_X,MAIN_FRAME_Y);
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				frame.setContentPane(layeredPane);
-				
+
 				layeredPane.add(bg);
 				layeredPane.add(core, new Integer(1));
-				
+
 				bg.setSize(frame.getSize());
 				core.setSize(frame.getSize());
 				bg.setVisible(true);
 				core.setVisible(true);
 				frame.setVisible(true);
 				core.setOpaque(false);
-				
-				int delay = 1000/60;       
-				//milliseconds
+
+				int delay = 1000/60;
+
 				ActionListener taskPerformer = new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent evt) {
