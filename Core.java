@@ -5,7 +5,10 @@ import javax.swing.event.MouseInputAdapter;
 import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.Scanner;
+import java.util.HashMap;
 import java.lang.ThreadGroup;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -13,31 +16,36 @@ import java.awt.event.MouseMotionListener;
 import java.awt.Point;
 import java.awt.Graphics;
 import java.awt.Color;
+import java.awt.Robot;
+import java.awt.AWTException;
 
 public class Core extends JPanel {
 
-	ArrayList<Chunk> chunk = new ArrayList<Chunk>();
-	ArrayList<Point> point = new ArrayList<Point>();
-	ArrayList<Vilager> villager = new ArrayList<Vilager>();
-	ArrayList<Chunk> chunkBuffer = new ArrayList<Chunk>();
-	ArrayList<Integer> drawIndex = new ArrayList<Integer>();
-	ArrayList<Integer> indexBuffer = new ArrayList<Integer>();
+	HashMap chunk = new HashMap<Point, Chunk>();
 
 	Point currentPoint = new Point(0,0);
 	Point lastPoint = new Point(0,0);
 	double x, y = 0;
-	
-	public static Images images = new Images();
-	
-	SwingWorker peon;
-	
-	static boolean mousePressed = false;
 
+	public static Images images = new Images();
+
+	SwingWorker peon;
+	Robot robot;
+
+	static boolean mousePressed = false;
+    boolean doneDone = true;
+    boolean backgroundDone = true;
 
 	public static ThreadGroup loadGroup = new ThreadGroup("loadGroup");
 
 	public Core() {
-		villager.add(new Vilager());
+		try {
+			robot = new Robot();
+		} catch (AWTException e) {
+			System.err.println("awt error thrown");
+		} catch (SecurityException e){
+			System.err.println("SECURITY error thrown");
+		}
 		(peon = new loadChunks()).execute();
 		Main.frame.addKeyListener(new KeyListener() {
 					public void keyPressed(KeyEvent e) {
@@ -54,7 +62,6 @@ public class Core extends JPanel {
 							currentPoint.x += 8;
 						}
 						if(e.getKeyCode() == KeyEvent.VK_SPACE) {
-							System.out.println(chunk.size());
 						}
 						if((currentPoint.x%128 == 0 || currentPoint.y%128 == 0) && (loadGroup.activeCount() == 0)) {
 						    (new Thread(loadGroup, new loadChunks())).start();
@@ -73,98 +80,87 @@ public class Core extends JPanel {
 	}
 
 	private class MotionListener extends MouseInputAdapter {
-	    int x, y, x2, y2;
-	    public void mousePressed(MouseEvent e) {
-	        if(e.getButton() == MouseEvent.BUTTON1) {
-	            x = e.getX();
-	            y = e.getY();
-	        }	        
-	    }
-	    public void mouseDragged(MouseEvent e) {
-	        x2 = e.getX();
-	        y2 = e.getY();
-	        currentPoint.x += x2-x;
-	        currentPoint.y += y2-y;
-	        x = x2;
-	        y = y2;
-	    }
-	}
-	public void paintComponent(Graphics g) {
-		g.setColor(Color.RED);
-		super.paintComponent(g);
-		for(int i = 0; i < drawIndex.size(); i++)
-		    try {
-		        chunk.get(drawIndex.get(i)).draw(g, currentPoint);
-		    } catch(Exception ignore) {
-		        
-		    }
-		    
-		g.drawString("("+currentPoint.getX()+";"+currentPoint.getY()+")", 10, 10);
-		g.drawString("cd: " + drawIndex.size(), 10, 20);
-		g.drawString("cl: " + chunk.size(), 10, 30);
-	}
-
-	public class Pair<U, V> {
-		private U first;
-		private V second;
-
-		public Pair(U first, V second) {
-			this.first = first;
-			this.second = second;
+		int button;
+		public void mousePressed(MouseEvent e) {
+			if(e.getButton() == MouseEvent.BUTTON1) {
+				robot.mouseMove(Main.frame.getLocationOnScreen().x+Main.frame.getSize().width/2,Main.frame.getLocationOnScreen().y+Main.frame.getSize().height/2);
+				button = e.getButton();
+			}
+		}
+		public void mouseDragged(MouseEvent e) {
+			if(button == MouseEvent.BUTTON1) {
+				currentPoint.x += (e.getX()-Main.frame.getSize().width/2);
+				currentPoint.y += (e.getY()-Main.frame.getSize().height/2);
+				robot.mouseMove(Main.frame.getLocationOnScreen().x+Main.frame.getSize().width/2,Main.frame.getLocationOnScreen().y+Main.frame.getSize().height/2);
+				update();
+			}
 		}
 	}
+	@Override
+	public void paintComponent(Graphics g) {
+	    Graphics g2 = g;
+		g2.setColor(Color.RED);
+		super.paintComponent(g2);
+		for(int i = (int)x-2; i < (int)x+5 + Math.ceil(Main.frame.getWidth()/128); ++i) {
+			for(int c = (int)y-4; c < (int)y+5+Math.ceil(Main.frame.getHeight()/128); ++c) {
+				try {
+					chunk.get(new Point(i, c)).draw(g2, currentPoint);
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 
-	public class loadChunks extends SwingWorker<Pair<ArrayList<Integer>, ArrayList<Chunk>>, Void> {
-		@Override
-    	public Pair<ArrayList<Integer>, ArrayList<Chunk>> doInBackground() {
-            x = currentPoint.getX()/128;
+		g2.drawString("("+currentPoint.getX()+";"+currentPoint.getY()+")", 10, 10);
+		g2.drawString("cd: " + drawIndex.size(), 10, 20);
+        g2.drawString("cl: " + chunk.size(), 10, 30);
+        g2.drawString("di: " + point.size(), 10, 40);
+    }
+
+    public class Pair<U, V> {
+        private U first;
+        private V second;
+
+        public Pair(U first, V second) {
+            this.first = first;
+            this.second = second;
+        }
+    }
+
+    public class loadChunks extends SwingWorker<Void, Void> {
+        @Override
+        public void doInBackground() {
+			int index;
+            Point currentPos = new Point((int)currentPoint.getX(), (int)currentPoint.getY());
+            int sizeX, sizeY;
+            x = currentPos.getX()/128;
             if(x < 0)
                 Math.floor(x);
             else
                 Math.ceil(x);
-            y = currentPoint.getY()/128;
+            y = currentPos.getY()/128;
             if(y < 0)
                     Math.floor(y);
             else
                 Math.ceil(y);
 
-            for(int i = (int)x-2; i < (int)x+2 + Math.ceil(Main.frame.getWidth()/128); ++i) {
-                for(int c = (int)y-2; c < (int)y+2+Math.ceil(Main.frame.getHeight()/128); ++c) {
-                    if(point.indexOf(new Point(i, c)) == -1) {
-                        point.add(new Point(i, c));
-                        chunkBuffer.add(new Chunk(point.get(point.size()- 1)));
+            if(Main.frame.getWidth() != 0) {
+                sizeX = Main.frame.getWidth();
+                sizeY = Main.frame.getHeight();
+            }else {
+                sizeX = 512;
+                sizeY = 512;
+            }
+            int ce = 0;
+            for(int i = (int)x-4; i < (int)x+5 + Math.ceil(sizeX/128); ++i) {
+                for(int c = (int)y-4; c < (int)y+5+Math.ceil(sizeY/128); ++c) {
+                    if(chunk.get(new Point(i, c)) == null) {
+                        chunk.put(new Point(i, c), new Chunk(new Point(i, c)));
                     }
-                    indexBuffer.add(point.indexOf(new Point(i, c)));
-
                 }
             }
-            return new Pair<ArrayList<Integer>, ArrayList<Chunk>>(indexBuffer, chunkBuffer);
+            return;
 		}
-		@Override
-		public void done() {
-            if(chunkBuffer.size() != 0) {
-                drawIndex.clear();
-                try {
-                	drawIndex.addAll(get().first);
-				} catch (Exception ignore) {
-				}
-				try {
-					chunk.addAll(get().second);
-				} catch (Exception ignore) {
-				}
-                System.out.println(chunk.size() + " and " + chunkBuffer.size());
-            }else if((currentPoint.x%128 == 0 || currentPoint.y%128 == 0) && !lastPoint.equals(currentPoint)) {
-                drawIndex.clear();
-				try {
-					drawIndex.addAll(get().first);
-				} catch (Exception ignore) {
-				}
-            }
-            lastPoint.x = (int)currentPoint.getX();
-            lastPoint.y = (int)currentPoint.getY();
-            chunkBuffer.clear();
-            indexBuffer.clear();
-    	}
 	}
 	public void update() {
 		if(peon.getState() == SwingWorker.StateValue.valueOf("DONE"))
