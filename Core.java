@@ -2,17 +2,12 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.event.MouseInputAdapter;
 
-import java.util.ArrayList;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.Scanner;
 import java.util.HashMap;
 import java.lang.ThreadGroup;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
 import java.awt.Point;
 import java.awt.Graphics;
 import java.awt.Color;
@@ -21,7 +16,8 @@ import java.awt.AWTException;
 
 public class Core extends JPanel {
 
-	HashMap chunk = new HashMap<Point, Chunk>();
+	HashMap<Point, Chunk> chunk = new HashMap<Point, Chunk>();
+	HashMap<Point, Chunk> chunkBuffer = new HashMap<Point, Chunk>();
 
 	Point currentPoint = new Point(0,0);
 	Point lastPoint = new Point(0,0);
@@ -29,7 +25,7 @@ public class Core extends JPanel {
 
 	public static Images images = new Images();
 
-	SwingWorker peon;
+	SwingWorker<HashMap<Point, Chunk>, Void> peon;
 	Robot robot;
 
 	static boolean mousePressed = false;
@@ -103,18 +99,17 @@ public class Core extends JPanel {
 		super.paintComponent(g2);
 		for(int i = (int)x-2; i < (int)x+5 + Math.ceil(Main.frame.getWidth()/128); ++i) {
 			for(int c = (int)y-4; c < (int)y+5+Math.ceil(Main.frame.getHeight()/128); ++c) {
-				try {
-					chunk.get(new Point(i, c)).draw(g2, currentPoint);
-				} catch(Exception e) {
-					e.printStackTrace();
-				}
+				if(chunk.containsKey(new Point(i, c))) 
+				    try {
+				        chunk.get(new Point(i, c)).draw(g2, currentPoint);
+				    } catch(Exception e) {
+				        e.printStackTrace();
+				    }
 			}
 		}
 
 		g2.drawString("("+currentPoint.getX()+";"+currentPoint.getY()+")", 10, 10);
-		g2.drawString("cd: " + drawIndex.size(), 10, 20);
         g2.drawString("cl: " + chunk.size(), 10, 30);
-        g2.drawString("di: " + point.size(), 10, 40);
     }
 
     public class Pair<U, V> {
@@ -127,10 +122,9 @@ public class Core extends JPanel {
         }
     }
 
-    public class loadChunks extends SwingWorker<Void, Void> {
+    public class loadChunks extends SwingWorker<HashMap<Point, Chunk>, Void> {
         @Override
-        public void doInBackground() {
-			int index;
+        public HashMap<Point, Chunk> doInBackground() {
             Point currentPos = new Point((int)currentPoint.getX(), (int)currentPoint.getY());
             int sizeX, sizeY;
             x = currentPos.getX()/128;
@@ -151,16 +145,23 @@ public class Core extends JPanel {
                 sizeX = 512;
                 sizeY = 512;
             }
-            int ce = 0;
             for(int i = (int)x-4; i < (int)x+5 + Math.ceil(sizeX/128); ++i) {
                 for(int c = (int)y-4; c < (int)y+5+Math.ceil(sizeY/128); ++c) {
                     if(chunk.get(new Point(i, c)) == null) {
-                        chunk.put(new Point(i, c), new Chunk(new Point(i, c)));
+                        chunkBuffer.put(new Point(i, c), new Chunk(new Point(i, c)));
                     }
                 }
             }
-            return;
+            return chunkBuffer;
 		}
+        @Override
+        public void done() {
+            try {
+                chunk.putAll(get());
+            } catch(Exception e) {
+                e.printStackTrace();
+            }    
+        }
 	}
 	public void update() {
 		if(peon.getState() == SwingWorker.StateValue.valueOf("DONE"))

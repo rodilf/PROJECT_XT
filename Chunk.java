@@ -23,6 +23,5 @@ public class Chunk {
 		for(int i = 0; i < tre.size(); ++i) {
 			tre.get(i).draw(g, pointer, q);
 		}
-		g.drawString("(" + pointer.getX() + ";" + pointer.getY() + ")", (int)(pointer.getX()*128-q.getX()), (int)(pointer.getY()*128-q.getY()));
 	}
 }
