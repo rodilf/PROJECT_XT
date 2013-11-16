@@ -4,7 +4,11 @@ import java.awt.Graphics;
 
 public class Background extends JPanel {
 
-	Gras gras = new Gras();
+	/**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    Gras gras = new Gras();
 
 	public Background() {
 	}
