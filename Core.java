@@ -3,8 +3,8 @@ import javax.swing.SwingWorker;
 import javax.swing.event.MouseInputAdapter;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.lang.ThreadGroup;
-
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -16,8 +16,8 @@ import java.awt.AWTException;
 
 public class Core extends JPanel {
 
-	HashMap<Point, Chunk> chunk = new HashMap<Point, Chunk>();
-	HashMap<Point, Chunk> chunkBuffer = new HashMap<Point, Chunk>();
+    ConcurrentHashMap<Point, Chunk> chunk = new ConcurrentHashMap<Point, Chunk>();
+    ConcurrentHashMap<Point, Chunk> chunkBuffer = new ConcurrentHashMap<Point, Chunk>();
 
 	Point currentPoint = new Point(0,0);
 	Point lastPoint = new Point(0,0);
@@ -25,7 +25,7 @@ public class Core extends JPanel {
 
 	public static Images images = new Images();
 
-	SwingWorker<HashMap<Point, Chunk>, Void> peon;
+	SwingWorker<ConcurrentHashMap<Point, Chunk>, Void> peon;
 	Robot robot;
 
 	static boolean mousePressed = false;
@@ -122,9 +122,9 @@ public class Core extends JPanel {
         }
     }
 
-    public class loadChunks extends SwingWorker<HashMap<Point, Chunk>, Void> {
+    public class loadChunks extends SwingWorker<ConcurrentHashMap<Point, Chunk>, Void> {
         @Override
-        public HashMap<Point, Chunk> doInBackground() {
+        public ConcurrentHashMap<Point, Chunk> doInBackground() {
             Point currentPos = new Point((int)currentPoint.getX(), (int)currentPoint.getY());
             int sizeX, sizeY;
             x = currentPos.getX()/128;
