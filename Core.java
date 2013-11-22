@@ -2,6 +2,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.event.MouseInputAdapter;
 
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.lang.ThreadGroup;
 import java.awt.event.KeyEvent;
@@ -19,13 +20,14 @@ public class Core extends JPanel {
      * 
      */
     private static final long serialVersionUID = 1L;
-    ConcurrentHashMap<Point, Chunk> chunk = new ConcurrentHashMap<Point, Chunk>();
-    ConcurrentHashMap<Point, Chunk> chunkBuffer = new ConcurrentHashMap<Point, Chunk>();
-
+    ConcurrentHashMap<Point, ConcurrentHashMap<Point, Chunk>> zones = new ConcurrentHashMap<Point, ConcurrentHashMap<Point, Chunk>>();
+    
 	Point currentPoint = new Point(0,0);
 	Point lastPoint = new Point(0,0);
 	double x, y = 0;
 
+	int cl = 0;
+	
 	public static Images images = new Images();
 
 	SwingWorker<ConcurrentHashMap<Point, Chunk>, Void> peon;
@@ -102,32 +104,25 @@ public class Core extends JPanel {
 		super.paintComponent(g2);
 		for(int i = (int)x-(int)Math.ceil(256/Chunk.size)-1; i < (int)x+(int)Math.ceil(640/Chunk.size)+1+Math.ceil(Main.frame.getWidth()/Chunk.size); ++i) {
 			for(int c = (int)y-(int)Math.ceil(512/Chunk.size)-1; c < (int)y+(int)Math.ceil(640/Chunk.size)+1+Math.ceil(Main.frame.getHeight()/Chunk.size); ++c) {
-				if(chunk.containsKey(new Point(i, c))) 
-				    try {
-				        chunk.get(new Point(i, c)).draw(g2, currentPoint);
-				    } catch(Exception e) {
-				        e.printStackTrace();
-				    }
+				if(zones.containsKey(new Point(i/16, c/16)))
+    			    if(zones.get(new Point(i/16, c/16)).containsKey(new Point(i, c))) 
+    				    try {
+    				        zones.get(new Point(i/16, c/16)).get(new Point(i, c)).draw(g2, currentPoint);
+    				    }catch(Exception e) {
+    				        e.printStackTrace();
+    				    }
 			}
 		}
 
 		g2.drawString("("+currentPoint.getX()+";"+currentPoint.getY()+")", 10, 10);
-        g2.drawString("cl: " + chunk.size(), 10, 30);
-    }
-
-    public class Pair<U, V> {
-        private U first;
-        private V second;
-
-        public Pair(U first, V second) {
-            this.first = first;
-            this.second = second;
-        }
+        g2.drawString("cl: " + cl, 10, 25);
+        g2.drawString("zl: " + zones.size(), 10, 40);
     }
 
     public class loadChunks extends SwingWorker<ConcurrentHashMap<Point, Chunk>, Void> {
         @Override
         public ConcurrentHashMap<Point, Chunk> doInBackground() {
+            ConcurrentHashMap<Point, Chunk> chunkBuffer = new ConcurrentHashMap<Point, Chunk>();
             Point currentPos = new Point((int)currentPoint.getX(), (int)currentPoint.getY());
             int sizeX, sizeY;
             x = currentPos.getX()/Chunk.size;
@@ -150,8 +145,10 @@ public class Core extends JPanel {
             }
             for(int i = (int)x-(int)Math.ceil(512/Chunk.size)-1; i < (int)x+(int)Math.ceil(640/Chunk.size)+1+Math.ceil(sizeX/Chunk.size); ++i) {
                 for(int c = (int)y-(int)Math.ceil(512/Chunk.size)-1; c < (int)y+(int)Math.ceil(640/Chunk.size)+1+Math.ceil(sizeY/Chunk.size); ++c) {
-                    if(chunk.get(new Point(i, c)) == null) {
+                    zones.putIfAbsent(new Point(i/16, c/16), new ConcurrentHashMap<Point, Chunk>());
+                    if(zones.get(new Point(i/16, c/16)).get(new Point(i, c)) == null) {
                         chunkBuffer.put(new Point(i, c), new Chunk(new Point(i, c)));
+                        cl++;
                     }
                 }
             }
@@ -159,8 +156,15 @@ public class Core extends JPanel {
 		}
         @Override
         public void done() {
+            ConcurrentHashMap<Point, Chunk> chunkBuffer = new ConcurrentHashMap<Point, Chunk>();
+            Point[] keys;
             try {
-                chunk.putAll(get());
+                chunkBuffer.putAll(get());
+                keys = chunkBuffer.keySet().toArray(new Point[chunkBuffer.size()]);
+                for(int i = 0; i < keys.length; ++i) {
+                   zones.get(new Point(keys[i].x/16, keys[i].y/16)).put(keys[i], chunkBuffer.get(keys[i]));
+                }
+                
             } catch(Exception e) {
                 e.printStackTrace();
             }    
