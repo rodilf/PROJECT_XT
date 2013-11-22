@@ -62,7 +62,7 @@ public class Core extends JPanel {
 						}
 						if(e.getKeyCode() == KeyEvent.VK_SPACE) {
 						}
-						if((currentPoint.x%128 == 0 || currentPoint.y%128 == 0) && (loadGroup.activeCount() == 0)) {
+						if((currentPoint.x%Chunk.size == 0 || currentPoint.y%Chunk.size == 0) && (loadGroup.activeCount() == 0)) {
 						    (new Thread(loadGroup, new loadChunks())).start();
 						}
 					}
@@ -100,8 +100,8 @@ public class Core extends JPanel {
 	    Graphics g2 = g;
 		g2.setColor(Color.RED);
 		super.paintComponent(g2);
-		for(int i = (int)x-2; i < (int)x+5 + Math.ceil(Main.frame.getWidth()/128); ++i) {
-			for(int c = (int)y-4; c < (int)y+5+Math.ceil(Main.frame.getHeight()/128); ++c) {
+		for(int i = (int)x-(int)Math.ceil(256/Chunk.size)-1; i < (int)x+(int)Math.ceil(640/Chunk.size)+1+Math.ceil(Main.frame.getWidth()/Chunk.size); ++i) {
+			for(int c = (int)y-(int)Math.ceil(512/Chunk.size)-1; c < (int)y+(int)Math.ceil(640/Chunk.size)+1+Math.ceil(Main.frame.getHeight()/Chunk.size); ++c) {
 				if(chunk.containsKey(new Point(i, c))) 
 				    try {
 				        chunk.get(new Point(i, c)).draw(g2, currentPoint);
@@ -130,12 +130,12 @@ public class Core extends JPanel {
         public ConcurrentHashMap<Point, Chunk> doInBackground() {
             Point currentPos = new Point((int)currentPoint.getX(), (int)currentPoint.getY());
             int sizeX, sizeY;
-            x = currentPos.getX()/128;
+            x = currentPos.getX()/Chunk.size;
             if(x < 0)
                 Math.floor(x);
             else
                 Math.ceil(x);
-            y = currentPos.getY()/128;
+            y = currentPos.getY()/Chunk.size;
             if(y < 0)
                     Math.floor(y);
             else
@@ -148,8 +148,8 @@ public class Core extends JPanel {
                 sizeX = 512;
                 sizeY = 512;
             }
-            for(int i = (int)x-4; i < (int)x+5 + Math.ceil(sizeX/128); ++i) {
-                for(int c = (int)y-4; c < (int)y+5+Math.ceil(sizeY/128); ++c) {
+            for(int i = (int)x-(int)Math.ceil(512/Chunk.size)-1; i < (int)x+(int)Math.ceil(640/Chunk.size)+1+Math.ceil(sizeX/Chunk.size); ++i) {
+                for(int c = (int)y-(int)Math.ceil(512/Chunk.size)-1; c < (int)y+(int)Math.ceil(640/Chunk.size)+1+Math.ceil(sizeY/Chunk.size); ++c) {
                     if(chunk.get(new Point(i, c)) == null) {
                         chunkBuffer.put(new Point(i, c), new Chunk(new Point(i, c)));
                     }
