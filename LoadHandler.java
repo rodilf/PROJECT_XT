@@ -49,4 +49,9 @@ public class LoadHandler {
             Main.io.saveZone(zone.getValue(), zone.getKey());
         }
     }
+    
+    public void unloadZone(ConcurrentHashMap<Point, Chunk> zone, Point zonePos) throws IOException {
+        Main.io.saveZone(zone, zonePos);
+        Main.core.zones.remove(zonePos);
+    }
 }
