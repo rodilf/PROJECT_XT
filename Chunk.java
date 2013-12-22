@@ -21,6 +21,8 @@ public class Chunk {
 				gras.add(new Gras(i*16, c*16));
 			}
 		}
+		if(p.getX() == 0 && p.getY() == 0)
+		    vilager.add(new Vilager(10, 10));
 	}
 	public void draw(Graphics g, Point q) {
 	    for(Vilager vilager : this.vilager)
@@ -29,22 +31,30 @@ public class Chunk {
 			tre.draw(g, pointer, q);
 		}
 	}
+	
+	public Chunk(Point p, ArrayList<Tre> tre, ArrayList<Vilager> vilager, ArrayList<Gras> gras) {
+	    pointer = p;
+	    this.tre = tre;
+	    this.vilager = vilager;
+	    this.gras = gras;
+	}
+	
 	@Override
 	public String toString() {
-	    String result = "vilager = [";
+	    String result = "(" + (int)pointer.getX() + "," + (int)pointer.getY() + ") = {" + "vilager = [";
 	    for(int i = 0; i < vilager.size(); ++i) {
 	        result += vilager.get(i).toString();
 	        if(i != vilager.size()-1)
-	            result += ", ";
+	            result += ";";
 	    }
-	    result += "]";
+	    result += "] ";
 	    result += "tre = [";
        for(int i = 0; i < tre.size(); ++i) {
             result += tre.get(i).toString();
             if(i != tre.size()-1)
-                result += ", ";
+                result += ";";
         }
-        result += "]";
+        result += "]}";
 	    return result;
 	}
 

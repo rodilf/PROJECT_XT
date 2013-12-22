@@ -1,6 +1,9 @@
 import java.awt.Point;
+import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class LoadHandler {
     
@@ -30,5 +33,20 @@ public class LoadHandler {
 
     public Chunk loadChunk(Point chunkPos) {
         return new Chunk(chunkPos);
+    }
+    
+    public ConcurrentHashMap<Point, Chunk> loadZone(Point zonePos) {
+        ConcurrentHashMap<Point, Chunk> result = new ConcurrentHashMap<Point, Chunk>();
+        try {
+             return Main.io.loadZone(zonePos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+    public void saveWorld (ConcurrentHashMap<Point, ConcurrentHashMap<Point, Chunk>> zones) throws IOException {
+        for(Entry<Point, ConcurrentHashMap<Point, Chunk>> zone : zones.entrySet()) {
+            Main.io.saveZone(zone.getValue(), zone.getKey());
+        }
     }
 }

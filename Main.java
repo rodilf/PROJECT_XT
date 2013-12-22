@@ -17,6 +17,7 @@ public class Main {
     static Core core = new Core();
     static Background bg = new Background();
     static LoadHandler loadHandler = new LoadHandler();
+    static IOHandler io = new IOHandler();
 
 	public static void main(String[] args) {
 

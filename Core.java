@@ -2,11 +2,9 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.event.MouseInputAdapter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.io.IOException;
 import java.lang.ThreadGroup;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -24,7 +22,6 @@ public class Core extends JPanel {
      */
     private static final long serialVersionUID = 1L;
     ConcurrentHashMap<Point, ConcurrentHashMap<Point, Chunk>> zones = new ConcurrentHashMap<Point, ConcurrentHashMap<Point, Chunk>>();
-    ConcurrentHashMap<Point, ConcurrentHashMap<Point, Chunk>> zoneUnload = new ConcurrentHashMap<Point, ConcurrentHashMap<Point, Chunk>>();
 	Point currentPoint = new Point(0,0);
 	Point lastPoint = new Point(0,0);
 	double x, y = 0;
@@ -65,7 +62,21 @@ public class Core extends JPanel {
 						if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
 							currentPoint.x += 8;
 						}
+						if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+						    try {
+                                Main.loadHandler.saveWorld(zones);
+                            } catch (IOException e1) {
+                                // TODO Auto-generated catch block
+                                e1.printStackTrace();
+                            }
+						    System.exit(0);
+						}
 						if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+						    try {
+                                Main.io.saveZone(zones.get(new Point(0, 0)), new Point(0, 0));
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
+                            }
 						}
 						if((currentPoint.x%Chunk.size == 0 || currentPoint.y%Chunk.size == 0) && (loadGroup.activeCount() == 0)) {
 						    (new Thread(loadGroup, new loadChunks())).start();
@@ -122,7 +133,6 @@ public class Core extends JPanel {
     }
 
     public class loadChunks extends SwingWorker<ConcurrentHashMap<Point, Chunk>, Void> {
-        ArrayList<Point> keysUsed = new ArrayList<Point>();
         @Override
         public ConcurrentHashMap<Point, Chunk> doInBackground() {
             ConcurrentHashMap<Point, Chunk> chunkBuffer = new ConcurrentHashMap<Point, Chunk>();
@@ -151,9 +161,15 @@ public class Core extends JPanel {
             for(int i = (int)x-(int)Math.ceil(512/Chunk.size)-1; i < (int)x+(int)Math.ceil(640/Chunk.size)+1+Math.ceil(sizeX/Chunk.size); ++i) {
                 for(int c = (int)y-(int)Math.ceil(512/Chunk.size)-1; c < (int)y+(int)Math.ceil(640/Chunk.size)+1+Math.ceil(sizeY/Chunk.size); ++c) {
                     point = new Point(i, c);
-                    zones.putIfAbsent(new Point(i/16, c/16), new ConcurrentHashMap<Point, Chunk>());
-                    keysUsed.add(point);
-                    if(zones.get(new Point(i/16, c/16)).get(point) == null) {
+                    if(!zones.containsKey(new Point(i/16, c/16)))
+                        try {
+                            zones.put(new Point(i/16, c/16), Main.io.loadZone(new Point(i/16, c/16)));
+                        } catch (Exception e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                   // zones.putIfAbsent(new Point(i/16, c/16), new ConcurrentHashMap<Point, Chunk>());
+                    if(!zones.get(new Point(i/16, c/16)).containsKey(point)) {
                         chunkBuffer.put(point, new Chunk(point));
                         cl++;
                     }
