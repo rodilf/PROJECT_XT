@@ -16,6 +16,7 @@ public class Main {
 	static JFrame frame = new JFrame();
     static Core core = new Core();
     static Background bg = new Background();
+    static LoadHandler loadHandler = new LoadHandler();
 
 	public static void main(String[] args) {
 

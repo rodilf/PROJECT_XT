@@ -7,7 +7,7 @@ public class Chunk {
     public static double size = 512;
 	public ArrayList<Tre> tre = new ArrayList<Tre>();
 	public Point pointer = new Point();
-	public Vilager vilager = new Vilager();
+	public ArrayList<Vilager> vilager = new ArrayList<Vilager>();
 	public ArrayList<Gras> gras = new ArrayList<Gras>();
 	
 	public Chunk (Point p) {
@@ -23,11 +23,29 @@ public class Chunk {
 		}
 	}
 	public void draw(Graphics g, Point q) {
-
+	    for(Vilager vilager : this.vilager)
 			vilager.draw(g, pointer, q);
-		for(int i = 0; i < tre.size(); ++i) {
-			tre.get(i).draw(g, pointer, q);
+		for(Tre tre : this.tre) {
+			tre.draw(g, pointer, q);
 		}
+	}
+	@Override
+	public String toString() {
+	    String result = "vilager = [";
+	    for(int i = 0; i < vilager.size(); ++i) {
+	        result += vilager.get(i).toString();
+	        if(i != vilager.size()-1)
+	            result += ", ";
+	    }
+	    result += "]";
+	    result += "tre = [";
+       for(int i = 0; i < tre.size(); ++i) {
+            result += tre.get(i).toString();
+            if(i != tre.size()-1)
+                result += ", ";
+        }
+        result += "]";
+	    return result;
 	}
 
 

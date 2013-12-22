@@ -20,4 +20,8 @@ public class Gras {
 
         System.out.println("update");
     }
+    @Override
+    public String toString() {
+        return "(" + x + ", " + y + ")";
+    }
 }
